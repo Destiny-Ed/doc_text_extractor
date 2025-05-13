@@ -1,39 +1,108 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# DocTextExtractor
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+A Flutter package for extracting text from Word (.doc, .docx), PDF, and Google Docs URLs
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+DocTextExtractor is a lightweight Flutter package that extracts text from Word (.doc, .docx), PDF, and Google Docs URLs, with offline .doc support and real filename extraction. Perfect for AI-driven apps like NotteChat, it enables document-based chat and analysis by processing legacy and modern formats efficiently.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- **Word (.doc, .docx) Extraction**: Parse legacy .doc files offline and .docx files via XML.
+- **PDF Extraction**: Extract text from PDFs using Syncfusion.
+- **Google Docs Support**: Download PDF exports from Google Docs URLs with real filename extraction.
+- **Offline Support**: Process local .doc, .docx, and PDF files without internet.
+- **Real Filename Extraction**: Retrieve accurate document names from Content-Disposition headers or URLs.
+- **Cross-Platform**: Works on iOS, Android, and web via Flutter.
 
-## Getting started
+## Installation
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Add the package to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  doc_text_extractor: ^1.0.0
+```
+
+Run:
+
+```bash
+flutter pub get
+```
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+### Extract Text from a URL
 
 ```dart
-const like = 'sample';
+import 'package:doc_text_extractor/doc_text_extractor.dart';
+
+void main() async {
+  final extractor = TextExtractor();
+  try {
+    // Extract text from a Google Docs URL
+    final result = await extractor.extractText('https://docs.google.com/document/d/EXAMPLE_ID/edit');
+    print('Filename: ${result['filename']}');
+    print('Text: ${result['text']}');
+
+    // Extract text from a .doc URL
+    final docResult = await extractor.extractText('https://example.com/sample.doc');
+    print('Filename: ${docResult['filename']}');
+    print('Text: ${docResult['text']}');
+
+    // Extract text from a .md URL
+    final mdResult = await extractor.extractText('https://example.com/sample.md');
+    print('Filename: ${mdResult['filename']}');
+    print('Text: ${mdResult['text']}');
+  } catch (e) {
+    print('Error: $e');
+  }
+}
 ```
 
-## Additional information
+### Extract Text from a Local File
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```dart
+import 'package:doc_text_extractor/doc_text_extractor.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+
+void main() async {
+  final extractor = TextExtractor();
+  try {
+    final dir = await getTemporaryDirectory();
+    final filePath = '${dir.path}/sample.pdf';
+    // Assume sample.pdf exists in temporary directory
+    final result = await extractor.extractText(filePath, isUrl: false);
+    print('Filename: ${result['filename']}');
+    print('Text: ${result['text']}');
+  } catch (e) {
+    print('Error: $e');
+  }
+}
+```
+
+## Dependencies
+
+- `http`: Fetches document URLs.
+- `syncfusion_flutter_pdf`: Extracts PDF text.
+- `archive` and `xml`: Parse .docx files.
+- `path_provider`: Handles local file storage.
+
+## Limitations
+
+- `.doc` parsing is basic (ASCII only); convert complex .doc files to .docx or PDF for better results.
+- Google Docs URLs must be publicly accessible or shared with export permissions.
+- Large files (>10MB) may require loading dialogs for optimal UX.
+
+## Contributing
+
+Contributions are welcome! Fork the repository, create a branch, and submit a pull request. Report issues at GitHub Issues.
+
+## License
+
+MIT License. See LICENSE for details.
+
+## Contact
+
+- **Developer**: JLiounis
+- **Email**: [your.email@example.com]
+- **Repository**: https://github.com/JLiounis/doc_text_extractor
