@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:archive/archive.dart';
 import 'package:xml/xml.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:markdown/markdown.dart';
 
 class TextExtractor {
@@ -18,7 +17,14 @@ class TextExtractor {
     final lwSource = source.toLowerCase();
     try {
       if (isUrl) {
-        final response = await http.get(Uri.parse(lwSource));
+        // Validate URL
+        final uri = Uri.parse(lwSource);
+        if (!uri.isAbsolute) {
+          throw Exception('Invalid URL');
+        }
+
+        //
+        final response = await http.get(uri);
         if (response.statusCode != 200) {
           throw Exception('Failed to fetch document: ${response.statusCode}');
         }
@@ -31,8 +37,11 @@ class TextExtractor {
 
         final bytes = response.bodyBytes;
 
-        if (lwSource.contains('docs.google.com') &&
-            contentType.contains('html')) {
+        //Check if Url is a valid Google docs url
+        bool isGoogleDoc =
+            uri.host.contains('docs.google.com') &&
+            uri.path.contains('/document/');
+        if (isGoogleDoc) {
           return await _extractGoogleDocsText(lwSource, filename);
         } else if (contentType.contains('application/msword') ||
             lwSource.endsWith('.doc')) {
@@ -167,7 +176,7 @@ class TextExtractor {
 }
 
 /// Converts a .docx file to text by extracting content from word/document.xml.
-Future<String> _extractDocxText(Uint8List bytes) async  {
+Future<String> _extractDocxText(Uint8List bytes) async {
   final archive = ZipDecoder().decodeBytes(bytes);
 
   final List<String> paragraphs = [];
