@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:archive/archive.dart';
@@ -10,7 +11,7 @@ import 'package:markdown/markdown.dart';
 
 class TextExtractor {
   // Extracts text from a document URL or local file path
-  Future<Map<String, dynamic>> extractText(
+  Future<({String filename, String text})> extractText(
     String source, {
     bool isUrl = true,
   }) async {
@@ -45,59 +46,64 @@ class TextExtractor {
           return await _extractGoogleDocsText(lwSource, filename);
         } else if (contentType.contains('application/msword') ||
             lwSource.endsWith('.doc')) {
-          return {
-            'text': await _extractDocText(bytes),
-            'filename': '$filename.doc',
-          };
+          return (
+            text: await _extractDocText(bytes),
+            filename: '$filename.doc',
+          );
         } else if (contentType.contains(
               'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             ) ||
             lwSource.endsWith('.docx')) {
-          return {
-            'text': await _extractDocxText(bytes),
-            'filename': '$filename.docx',
-          };
+          return (
+            text: await _extractDocxText(bytes),
+            filename: '$filename.docx',
+          );
         } else if (contentType.contains('application/pdf') ||
             lwSource.endsWith('.pdf')) {
-          return {
-            'text': await _extractPdfText(bytes),
-            'filename': '$filename.pdf',
-          };
+          return (
+            text: await _extractPdfText(bytes),
+            filename: '$filename.pdf',
+          );
         } else if (contentType.contains('text/markdown') ||
             lwSource.endsWith('.md')) {
-          return {
-            'text': _extractMarkdownText(utf8.decode(bytes)),
-            'filename': '$filename.md',
-          };
+          return (
+            text: _extractMarkdownText(utf8.decode(bytes)),
+            filename: '$filename.md',
+          );
         } else {
           throw Exception('Unsupported document type: $contentType');
         }
       } else {
         // Local file handling
+
         final file = File(lwSource);
-        final bytes = await file.readAsBytes();
+        final byte =
+            kIsWeb
+                ? await file.readAsBytes()
+                : await File(file.path).readAsBytes();
+
         final extension = lwSource.split('.').last.toLowerCase();
 
         if (extension == 'doc') {
-          return {
-            'text': await _extractDocText(bytes),
-            'filename': file.uri.pathSegments.last,
-          };
+          return (
+            text: await _extractDocText(byte),
+            filename: file.uri.pathSegments.last,
+          );
         } else if (extension == 'docx') {
-          return {
-            'text': await _extractDocxText(bytes),
-            'filename': file.uri.pathSegments.last,
-          };
+          return (
+            text: await _extractDocxText(byte),
+            filename: file.uri.pathSegments.last,
+          );
         } else if (extension == 'pdf') {
-          return {
-            'text': await _extractPdfText(bytes),
-            'filename': file.uri.pathSegments.last,
-          };
+          return (
+            text: await _extractPdfText(byte),
+            filename: file.uri.pathSegments.last,
+          );
         } else if (extension == 'md') {
-          return {
-            'text': _extractMarkdownText(await file.readAsString()),
-            'filename': file.uri.pathSegments.last,
-          };
+          return (
+            text: _extractMarkdownText(await file.readAsString()),
+            filename: file.uri.pathSegments.last,
+          );
         } else {
           throw Exception('Unsupported local file type: $extension');
         }
@@ -208,7 +214,7 @@ Future<String> _extractPdfText(Uint8List bytes) async {
 }
 
 // Google Docs text extraction (downloads PDF export)
-Future<Map<String, dynamic>> _extractGoogleDocsText(
+Future<({String filename, String text})> _extractGoogleDocsText(
   String url,
   String defaultFilename,
 ) async {
@@ -218,7 +224,7 @@ Future<Map<String, dynamic>> _extractGoogleDocsText(
     throw Exception('Failed to fetch Google Docs PDF: ${response.statusCode}');
   }
   final text = await _extractPdfText(response.bodyBytes);
-  return {'text': text, 'filename': '$defaultFilename.pdf'};
+  return (text: text, filename: '$defaultFilename.pdf');
 }
 
 // Markdown text extraction (converts to plain text)
