@@ -22,7 +22,9 @@ class TextExtractor {
     bool isUrl = true,
   }) async {
     try {
-      return isUrl ? await _extractFromUrl(source) : await _extractFromLocalFile(source);
+      return isUrl
+          ? await _extractFromUrl(source)
+          : await _extractFromLocalFile(source);
     } catch (e) {
       throw Exception('Failed to extract text: $e');
     }
@@ -35,45 +37,36 @@ class TextExtractor {
       throw Exception('Invalid URL: $url');
     }
 
+    if (uri.host.contains('docs.google.com') &&
+        uri.path.contains('/document/')) {
+      return await _extractGoogleDocsText(uri);
+    }
+
     final response = await http.get(uri);
     if (response.statusCode != 200) {
       throw Exception('Failed to fetch document: ${response.statusCode}');
     }
 
-    
-
-    if (uri.host.contains('docs.google.com') && uri.path.contains('/document/')) {
-      return await _extractGoogleDocsText(uri);
-    }
-
     final contentType = response.headers['content-type']?.toLowerCase() ?? '';
-    final contentDisposition = response.headers['content-disposition'];
-    final filename = _extractFilename(contentDisposition, url) ?? 'document';
+    final filename = url.toLowerCase().split("/").last;
     final bytes = response.bodyBytes;
 
     return switch (_getFileType(contentType, url)) {
-      'doc' => (
-          filename: '$filename.doc',
-          text: await _extractDocText(bytes),
-        ),
-      'docx' => (
-          filename: '$filename.docx',
-          text: await _extractDocxText(bytes),
-        ),
-      'pdf' => (
-          filename: '$filename.pdf',
-          text: await _extractPdfText(bytes),
-        ),
+      'doc' => (filename: filename, text: await _extractDocText(bytes)),
+      'docx' => (filename: filename, text: await _extractDocxText(bytes)),
+      'pdf' => (filename: filename, text: await _extractPdfText(bytes)),
       'md' => (
-          filename: '$filename.md',
-          text: _extractMarkdownText(utf8.decode(bytes)),
-        ),
+        filename: filename,
+        text: _extractMarkdownText(utf8.decode(bytes)),
+      ),
       _ => throw Exception('Unsupported document type: $contentType'),
     };
   }
 
   /// Extracts text from a local file.
-  Future<({String filename, String text})> _extractFromLocalFile(String filePath) async {
+  Future<({String filename, String text})> _extractFromLocalFile(
+    String filePath,
+  ) async {
     final file = File(filePath);
     if (!await file.exists()) {
       throw Exception('File not found: $filePath');
@@ -84,39 +77,35 @@ class TextExtractor {
     final extension = filename.split('.').last.toLowerCase();
 
     return switch (extension) {
-      'doc' => (
-          filename: filename,
-          text: await _extractDocText(bytes),
-        ),
-      'docx' => (
-          filename: filename,
-          text: await _extractDocxText(bytes),
-        ),
-      'pdf' => (
-          filename: filename,
-          text: await _extractPdfText(bytes),
-        ),
+      'doc' => (filename: filename, text: await _extractDocText(bytes)),
+      'docx' => (filename: filename, text: await _extractDocxText(bytes)),
+      'pdf' => (filename: filename, text: await _extractPdfText(bytes)),
       'md' => (
-          filename: filename,
-          text: _extractMarkdownText(await file.readAsString()),
-        ),
+        filename: filename,
+        text: _extractMarkdownText(await file.readAsString()),
+      ),
       _ => throw Exception('Unsupported local file type: $extension'),
     };
   }
 
   /// Determines the file type based on content type or URL extension.
   String _getFileType(String contentType, String url) {
-    if (contentType.contains('application/msword') || url.toLowerCase().endsWith('.doc')) {
+    if (contentType.contains('application/msword') ||
+        url.toLowerCase().endsWith('.doc')) {
       return 'doc';
     }
-    if (contentType.contains('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
+    if (contentType.contains(
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ) ||
         url.toLowerCase().endsWith('.docx')) {
       return 'docx';
     }
-    if (contentType.contains('application/pdf') || url.toLowerCase().endsWith('.pdf')) {
+    if (contentType.contains('application/pdf') ||
+        url.toLowerCase().endsWith('.pdf')) {
       return 'pdf';
     }
-    if (contentType.contains('text/markdown') || url.toLowerCase().endsWith('.md')) {
+    if (contentType.contains('text/markdown') ||
+        url.toLowerCase().endsWith('.md')) {
       return 'md';
     }
     return 'unknown';
@@ -124,8 +113,11 @@ class TextExtractor {
 
   /// Extracts filename from Content-Disposition header or URL.
   String? _extractFilename(String? contentDisposition, String url) {
-    if (contentDisposition != null && contentDisposition.contains('filename=')) {
-      final match = RegExp(r'filename="([^"]+)"').firstMatch(contentDisposition);
+    if (contentDisposition != null &&
+        contentDisposition.contains('filename=')) {
+      final match = RegExp(
+        r'filename="([^"]+)"',
+      ).firstMatch(contentDisposition);
       if (match != null && match.group(1) != null) {
         return _sanitizeFilename(match.group(1)!);
       }
@@ -173,13 +165,16 @@ class TextExtractor {
         buffer.write('\n');
       }
 
-      final text = buffer.toString().replaceAll(RegExp(r'\n\s*\n+'), '\n').trim();
+      final text =
+          buffer.toString().replaceAll(RegExp(r'\n\s*\n+'), '\n').trim();
       if (text.isEmpty) {
         throw Exception('No readable text found in .doc file');
       }
       return text;
     } catch (e) {
-      throw Exception('Failed to extract .doc text: File may be corrupted or unsupported. Try converting to .docx or PDF.');
+      throw Exception(
+        'Failed to extract .doc text: File may be corrupted or unsupported. Try converting to .docx or PDF.',
+      );
     }
   }
 
@@ -193,10 +188,13 @@ class TextExtractor {
       }
 
       final document = xml.XmlDocument.parse(utf8.decode(file.content));
-      final paragraphs = document
-          .findAllElements('w:p')
-          .map((p) => p.findAllElements('w:t').map((t) => t.innerText).join())
-          .toList();
+      final paragraphs =
+          document
+              .findAllElements('w:p')
+              .map(
+                (p) => p.findAllElements('w:t').map((t) => t.innerText).join(),
+              )
+              .toList();
 
       return paragraphs.join('\n').trim();
     } catch (e) {
@@ -218,26 +216,33 @@ class TextExtractor {
   }
 
   /// Extracts text from a Google Docs URL by downloading its PDF export.
-  Future<({String filename, String text})> _extractGoogleDocsText(Uri uri) async {
-    final docId = uri.pathSegments
-        .firstWhere(
-          (segment) => segment.length > 20 && RegExp(r'^[0-9A-Za-z_-]+$').hasMatch(segment),
-          orElse: () => '',
-        );
+  Future<({String filename, String text})> _extractGoogleDocsText(
+    Uri uri,
+  ) async {
+    final docId = uri.pathSegments.firstWhere(
+      (segment) =>
+          segment.length > 20 && RegExp(r'^[0-9A-Za-z_-]+$').hasMatch(segment),
+      orElse: () => '',
+    );
     if (docId.isEmpty) {
       throw Exception('Invalid Google Docs URL');
     }
 
-    final exportUrl = Uri.parse('https://docs.google.com/document/d/$docId/export?format=pdf');
+    final exportUrl = Uri.parse(
+      'https://docs.google.com/document/d/$docId/export?format=pdf',
+    );
     String fileName = "$docId.pdf";
     final response = await http.get(exportUrl);
     if (response.statusCode != 200) {
-      throw Exception('Failed to fetch Google Docs PDF: ${response.statusCode}');
+      throw Exception(
+        'Failed to fetch Google Docs PDF: ${response.statusCode}',
+      );
     }
 
     ///Extract google docs file name
     final contentDisposition = response.headers['content-disposition'];
-      fileName = _extractFilename(contentDisposition, exportUrl.path) ?? 'googleDoc';
+    fileName =
+        _extractFilename(contentDisposition, exportUrl.path) ?? 'googleDoc';
     // final bytes = response.bodyBytes;
 
     final text = await _extractPdfText(response.bodyBytes);
@@ -248,7 +253,10 @@ class TextExtractor {
   String _extractMarkdownText(String markdownContent) {
     final document = Document();
     final lines = markdownContent.split('\n');
-    final plainText = document.parseLines(lines).map((node) => node.textContent).join('\n');
+    final plainText = document
+        .parseLines(lines)
+        .map((node) => node.textContent)
+        .join('\n');
     return plainText.trim();
   }
 }
