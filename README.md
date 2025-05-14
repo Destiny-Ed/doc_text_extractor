@@ -1,15 +1,15 @@
 # DocTextExtractor
 
-A Flutter package for extracting text from Word (.doc, .docx), PDF, and Google Docs URLs
+A Flutter package for extracting text from Word (.doc, .docx), PDF, Markdown(.md) and Google Docs URLs
 
-DocTextExtractor is a lightweight Flutter package that extracts text from Word (.doc, .docx), PDF, and Google Docs URLs, with offline .doc support and real filename extraction. Perfect for AI-driven apps like NotteChat, it enables document-based chat and analysis by processing legacy and modern formats efficiently.
+DocTextExtractor is a lightweight Flutter package that extracts text from Word (.doc, .docx), PDF, Markdown(.md) and Google Docs URLs, with offline .doc support and real filename extraction. Perfect for AI-driven apps like [NotteChat](https://nottechat.com), it enables document-based chat and analysis by processing legacy and modern formats efficiently.
 
 ## Features
 
 - **Word (.doc, .docx) Extraction**: Parse legacy .doc files offline and .docx files via XML.
 - **PDF Extraction**: Extract text from PDFs using Syncfusion.
 - **Google Docs Support**: Download PDF exports from Google Docs URLs with real filename extraction.
-- **Offline Support**: Process local .doc, .docx, and PDF files without internet.
+- **Offline Support**: Process local .doc, .docx, .md, and PDF files without internet.
 - **Real Filename Extraction**: Retrieve accurate document names from Content-Disposition headers or URLs.
 - **Cross-Platform**: Works on iOS, Android, and web via Flutter.
 
@@ -85,11 +85,9 @@ void main() async {
 - `http`: Fetches document URLs.
 - `syncfusion_flutter_pdf`: Extracts PDF text.
 - `archive` and `xml`: Parse .docx files.
-- `path_provider`: Handles local file storage.
 
 ## Limitations
 
-- `.doc` parsing is basic (ASCII only); convert complex .doc files to .docx or PDF for better results.
 - Google Docs URLs must be publicly accessible or shared with export permissions.
 - Large files (>10MB) may require loading dialogs for optimal UX.
 
@@ -103,6 +101,6 @@ MIT License. See LICENSE for details.
 
 ## Contact
 
-- **Developer**: JLiounis
-- **Email**: [your.email@example.com]
-- **Repository**: https://github.com/JLiounis/doc_text_extractor
+- **Developer**: Destiny Ed
+- **Email**: [talk2destinyed@gmail.com]
+- **Repository**: https://github.com/Destiny-Ed/doc_text_extractor

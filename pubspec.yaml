@@ -15,7 +15,6 @@ dependencies:
   syncfusion_flutter_pdf: ^29.1.41
   archive: ^4.0.7
   xml: ^6.5.0
-  path_provider: ^2.1.5
   markdown: ^7.3.0
 
 dev_dependencies:
