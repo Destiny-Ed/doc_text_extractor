@@ -40,14 +40,16 @@ class TextExtractor {
       throw Exception('Failed to fetch document: ${response.statusCode}');
     }
 
+    
+
+    if (uri.host.contains('docs.google.com') && uri.path.contains('/document/')) {
+      return await _extractGoogleDocsText(uri);
+    }
+
     final contentType = response.headers['content-type']?.toLowerCase() ?? '';
     final contentDisposition = response.headers['content-disposition'];
     final filename = _extractFilename(contentDisposition, url) ?? 'document';
     final bytes = response.bodyBytes;
-
-    if (uri.host.contains('docs.google.com') && uri.path.contains('/document/')) {
-      return await _extractGoogleDocsText(uri, filename);
-    }
 
     return switch (_getFileType(contentType, url)) {
       'doc' => (
@@ -124,8 +126,8 @@ class TextExtractor {
   String? _extractFilename(String? contentDisposition, String url) {
     if (contentDisposition != null && contentDisposition.contains('filename=')) {
       final match = RegExp(r'filename="([^"]+)"').firstMatch(contentDisposition);
-      if (match?.group(1) != null) {
-        return _sanitizeFilename(match!.group(1)!);
+      if (match != null && match.group(1) != null) {
+        return _sanitizeFilename(match.group(1)!);
       }
     }
     final uri = Uri.parse(url);
@@ -216,7 +218,7 @@ class TextExtractor {
   }
 
   /// Extracts text from a Google Docs URL by downloading its PDF export.
-  Future<({String filename, String text})> _extractGoogleDocsText(Uri uri, String defaultFilename) async {
+  Future<({String filename, String text})> _extractGoogleDocsText(Uri uri) async {
     final docId = uri.pathSegments
         .firstWhere(
           (segment) => segment.length > 20 && RegExp(r'^[0-9A-Za-z_-]+$').hasMatch(segment),
@@ -227,13 +229,19 @@ class TextExtractor {
     }
 
     final exportUrl = Uri.parse('https://docs.google.com/document/d/$docId/export?format=pdf');
+    String fileName = "$docId.pdf";
     final response = await http.get(exportUrl);
     if (response.statusCode != 200) {
       throw Exception('Failed to fetch Google Docs PDF: ${response.statusCode}');
     }
 
+    ///Extract google docs file name
+    final contentDisposition = response.headers['content-disposition'];
+      fileName = _extractFilename(contentDisposition, exportUrl.path) ?? 'googleDoc';
+    // final bytes = response.bodyBytes;
+
     final text = await _extractPdfText(response.bodyBytes);
-    return (filename: '$docId.pdf', text: text);
+    return (filename: fileName, text: text);
   }
 
   /// Converts Markdown content to plain text.
