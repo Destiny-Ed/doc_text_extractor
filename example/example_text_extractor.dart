@@ -1,10 +1,11 @@
+import 'dart:developer';
+
 import 'package:doc_text_extractor/doc_text_extractor.dart';
 
 void main() async {
- 
   try {
     // Example: Extract text from a public Google Docs URL
-    final googleDocsResult = await TextExtractor.extractText(
+    final googleDocsResult = await TextExtractor().extractText(
       'https://docs.google.com/document/d/EXAMPLE_ID/edit',
       isUrl: true,
     );
@@ -12,7 +13,7 @@ void main() async {
     print('Google Docs Text: ${googleDocsResult.text.substring(0, 100)}...');
 
     // Example: Extract text from a .doc URL
-    final docResult = await TextExtractor.extractText(
+    final docResult = await TextExtractor().extractText(
       'https://example.com/sample.doc',
       isUrl: true,
     );
@@ -20,12 +21,21 @@ void main() async {
     print('DOC Text: ${docResult.text.substring(0, 100)}...');
 
     // Example: Extract text from a .md URL
-    final mdResult = await TextExtractor.extractText(
+    final mdResult = await TextExtractor().extractText(
       'https://example.com/sample.md',
       isUrl: true,
     );
     print('Markdown Filename: ${mdResult.filename}');
     print('Markdown Text: ${mdResult.text.substring(0, 100)}...');
+
+    final chapters = await TextExtractor().extractChapters(
+      'https://example.com/sample.doc',
+      isUrl: true,
+    );
+
+    for (var chapter in chapters) {
+      log("Chapters ::: ${chapter.toJson()}");
+    }
   } catch (e) {
     print('Error: $e');
   }
