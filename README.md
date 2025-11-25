@@ -2,7 +2,7 @@
 
 A Flutter package for extracting text from Word (.doc, .docx), PDF, Markdown(.md) and Google Docs URLs
 
-DocTextExtractor is a lightweight Flutter package that extracts text from Word (.doc, .docx), PDF, Markdown(.md) and Google Docs URLs, with offline .doc support and real filename extraction. Perfect for AI-driven apps like [NotteChat](https://nottechat.com), it enables document-based chat and analysis by processing legacy and modern formats efficiently.
+DocTextExtractor is a lightweight Flutter package that extracts text from Word (.doc, .docx), PDF, Markdown(.md) and Google Docs URLs, with offline .doc support, real filename extraction, and automatic chapter splitting. Perfect for AI-driven apps like [NotteChat](https://nottechat.com), it enables document-based chat and analysis by processing legacy and modern formats efficiently.
 
 ## Features
 
@@ -11,6 +11,7 @@ DocTextExtractor is a lightweight Flutter package that extracts text from Word (
 - **Google Docs Support**: Download PDF exports from Google Docs URLs with real filename extraction.
 - **Offline Support**: Process local .doc, .docx, .md, and PDF files without internet.
 - **Real Filename Extraction**: Retrieve accurate document names from Content-Disposition headers or URLs.
+- **Chapter Extractions**: Automatically split documents into logical chapters
 - **Cross-Platform**: Works on iOS, Android, and web via Flutter.
 
 ## Installation
