@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:doc_text_extractor/src/isolates/pdf_isolate.dart';
+import 'package:flutter/foundation.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'parser_base.dart';
@@ -10,14 +12,12 @@ class PdfParser extends ParserBase {
     Uint8List bytes,
     Function(double progress)? onProgress,
   ) async {
-    // final doc = PdfDocument(inputBytes: bytes);
-    // final extractor = PdfTextExtractor(doc);
+    // If file is large (>1.5 MB), isolate is MUCH safer
+    final isLarge = bytes.lengthInBytes > 1.5 * 1024 * 1024;
 
-    // final text = extractor.extractText();
-
-    // doc.dispose();
-
-    // return text.trim();
+    if (isLarge) {
+      return compute(extractPdfInIsolate, bytes);
+    }
 
     final document = PdfDocument(inputBytes: bytes);
     final extractor = PdfTextExtractor(document);
