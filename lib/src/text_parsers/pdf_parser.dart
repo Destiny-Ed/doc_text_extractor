@@ -16,8 +16,6 @@ class PdfParser extends ParserBase {
     // If file is large (>1.5 MB), isolate is MUCH safer
     final isLarge = bytes.lengthInBytes > 1.5 * 1024 * 1024;
 
-    debugPrint("It's fucking large!!!!!!!! $isLarge");
-
     if (isLarge) {
       return compute(extractPdfInIsolate, bytes);
     }

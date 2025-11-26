@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:doc_text_extractor/doc_text_extractor.dart';
 import 'package:doc_text_extractor/src/text_parsers/parser_base.dart';
 import 'package:http/http.dart' as http;
-import 'package:doc_text_extractor/src/chapter_extractor.dart';
+import 'package:doc_text_extractor/src/chapter/chapter_extractor.dart';
 import 'utils/network_utils.dart';
 import 'utils/file_utils.dart';
 import 'text_parsers/doc_parser.dart';
