@@ -1,6 +1,6 @@
 name: doc_text_extractor
-description: A Flutter package for extracting text from Word (.doc, .docx), PDF, Google Docs URLs, and Markdown (.md) files, with offline .doc and .md support and real filename extraction.
-version: 2.0.0
+description: A Flutter package for extracting text and chapters from Word (.doc, .docx), PDF, Google Docs URLs, and Markdown (.md) files, with offline .doc and .md support and real filename extraction.
+version: 2.1.0
 homepage: https://github.com/Destiny-Ed/doc_text_extractor
 repository: https://github.com/Destiny-Ed/doc_text_extractor
 

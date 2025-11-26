@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:doc_text_extractor/src/isolates/doc_isolate.dart';
 import 'package:flutter/foundation.dart';
 

@@ -1,6 +1,4 @@
-import 'dart:typed_data';
 import 'dart:convert';
-
 import 'package:archive/archive.dart';
 import 'package:doc_text_extractor/src/isolates/docx_isolate.dart';
 import 'package:flutter/foundation.dart';
