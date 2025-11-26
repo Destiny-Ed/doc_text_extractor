@@ -41,10 +41,14 @@ class TextExtractor {
   Future<List<Chapter>> extractChapters(
     String source, {
     bool isUrl = false,
+    void Function(double progress)? onProgress,
   }) async {
     final bytesResponse =
         isUrl ? await fetchBytes(source) : await _readLocal(source);
-    return ChapterExtractor.extract(bytesResponse.bytes);
+    return ChapterExtractor.extract(
+      bytesResponse.bytes,
+      onProgress: onProgress,
+    );
   }
 
   // --------------------------- PRIVATE HELPERS ------------------------------
