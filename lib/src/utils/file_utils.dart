@@ -1,3 +1,5 @@
+import 'package:http/http.dart';
+
 String detectFileType(String? contentType, String filename) {
   final lower = contentType?.toLowerCase() ?? "";
   final ext = filename.toLowerCase();
@@ -20,7 +22,7 @@ String sanitizeFilename(String filename) {
   return valid.contains(ext) ? cleaned : "$cleaned.pdf";
 }
 
-String resolveFilename(String url, response) {
+String resolveFilename(String url, Response? response) {
   final header = response?.headers["content-disposition"];
 
   if (header != null && header.contains("filename=")) {

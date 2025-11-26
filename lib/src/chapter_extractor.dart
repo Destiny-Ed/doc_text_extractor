@@ -145,15 +145,7 @@ class ChapterExtractor {
         ),
       ];
     } catch (_) {
-      return [
-        Chapter(
-          id: 1,
-          title: "Document",
-          content: "Content could not be extracted.",
-          startPage: 1,
-          endPage: 100,
-        ),
-      ];
+      return [];
     }
   }
 }
