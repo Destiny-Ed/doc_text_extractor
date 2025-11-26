@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:doc_text_extractor/doc_text_extractor.dart';
 import 'package:doc_text_extractor/src/text_parsers/parser_base.dart';
 import 'package:http/http.dart' as http;
-import 'package:doc_text_extractor/src/chapter_extractor.dart';
+import 'package:doc_text_extractor/src/chapter/chapter_extractor.dart';
 import 'utils/network_utils.dart';
 import 'utils/file_utils.dart';
 import 'text_parsers/doc_parser.dart';
@@ -17,6 +17,7 @@ class TextExtractor {
   Future<({String filename, String text, Uint8List byte})> extractText(
     String source, {
     bool isUrl = true,
+    void Function(double progress)? onProgress,
   }) async {
     final bytesResponse =
         isUrl ? await fetchBytes(source) : await _readLocal(source);
@@ -31,7 +32,7 @@ class TextExtractor {
 
     final parser = _getParser(type);
 
-    final text = await parser.parse(bytes);
+    final text = await parser.parse(bytes, onProgress);
 
     return (filename: filename, text: text, byte: bytes);
   }
@@ -40,10 +41,14 @@ class TextExtractor {
   Future<List<Chapter>> extractChapters(
     String source, {
     bool isUrl = false,
+    void Function(double progress)? onProgress,
   }) async {
     final bytesResponse =
         isUrl ? await fetchBytes(source) : await _readLocal(source);
-    return ChapterExtractor.extract(bytesResponse.bytes);
+    return ChapterExtractor.extract(
+      bytesResponse.bytes,
+      onProgress: onProgress,
+    );
   }
 
   // --------------------------- PRIVATE HELPERS ------------------------------
