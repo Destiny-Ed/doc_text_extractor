@@ -8,7 +8,10 @@ import 'parser_base.dart';
 
 class DocxParser extends ParserBase {
   @override
-  Future<String> parse(Uint8List bytes) async {
+  Future<String> parse(
+    Uint8List bytes,
+    Function(double progress)? onProgress,
+  ) async {
     final archive = ZipDecoder().decodeBytes(bytes);
     final file = archive.findFile('word/document.xml');
 

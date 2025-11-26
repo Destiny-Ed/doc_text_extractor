@@ -6,13 +6,42 @@ import 'parser_base.dart';
 
 class PdfParser extends ParserBase {
   @override
-  Future<String> parse(Uint8List bytes) async {
-    final doc = PdfDocument(inputBytes: bytes);
-    final extractor = PdfTextExtractor(doc);
+  Future<String> parse(
+    Uint8List bytes,
+    Function(double progress)? onProgress,
+  ) async {
+    // final doc = PdfDocument(inputBytes: bytes);
+    // final extractor = PdfTextExtractor(doc);
 
-    final text = extractor.extractText();
-    doc.dispose();
+    // final text = extractor.extractText();
 
-    return text.trim();
+    // doc.dispose();
+
+    // return text.trim();
+
+    final document = PdfDocument(inputBytes: bytes);
+    final extractor = PdfTextExtractor(document);
+
+    final int pageCount = document.pages.count;
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < pageCount; i++) {
+      final pageText = extractor.extractText(
+        startPageIndex: i,
+        endPageIndex: i,
+      );
+      buffer.write('\n$pageText');
+
+      // Emit progress (0.0 — 1.0)
+      if (onProgress != null) {
+        onProgress((i + 1) / pageCount);
+      }
+
+      // Small async yield for UI responsiveness
+      await Future.delayed(const Duration(milliseconds: 5));
+    }
+
+    document.dispose();
+    return buffer.toString().trim();
   }
 }

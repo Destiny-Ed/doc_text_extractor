@@ -4,7 +4,10 @@ import 'parser_base.dart';
 /// Basic ASCII text extractor for legacy .doc files.
 class DocParser extends ParserBase {
   @override
-  Future<String> parse(Uint8List bytes) async {
+  Future<String> parse(
+    Uint8List bytes,
+    Function(double progress)? onProgress,
+  ) async {
     final buffer = StringBuffer();
     bool inText = false;
 

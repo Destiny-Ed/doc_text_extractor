@@ -17,6 +17,7 @@ class TextExtractor {
   Future<({String filename, String text, Uint8List byte})> extractText(
     String source, {
     bool isUrl = true,
+    void Function(double progress)? onProgress,
   }) async {
     final bytesResponse =
         isUrl ? await fetchBytes(source) : await _readLocal(source);
@@ -31,7 +32,7 @@ class TextExtractor {
 
     final parser = _getParser(type);
 
-    final text = await parser.parse(bytes);
+    final text = await parser.parse(bytes, onProgress);
 
     return (filename: filename, text: text, byte: bytes);
   }
